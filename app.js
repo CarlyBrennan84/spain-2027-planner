@@ -206,14 +206,14 @@ function defaultState(){
   });
 
   const budget = [
-    {cat:'Accommodation', est: CITIES.reduce((s,c)=>s+c.accommodation.cost,0), actual:0, paid:false, notes:'Auto-totalled from accommodation'},
-    {cat:'Flights',       est:0, actual:0, paid:false, notes:''},
-    {cat:'Trains',        est:0, actual:0, paid:false, notes:''},
-    {cat:'Car Hire',      est:0, actual:0, paid:false, notes:''},
-    {cat:'Restaurants',   est:0, actual:0, paid:false, notes:''},
-    {cat:'Experiences',   est:0, actual:0, paid:false, notes:''},
-    {cat:'Shopping',      est:0, actual:0, paid:false, notes:''},
-    {cat:'Miscellaneous', est:0, actual:0, paid:false, notes:''},
+    {cat:'Accommodation', est: CITIES.reduce((s,c)=>s+c.accommodation.cost,0), actual:0, deposit:0, notes:'Auto-totalled from accommodation'},
+    {cat:'Flights',       est:0, actual:0, deposit:0, notes:''},
+    {cat:'Trains',        est:0, actual:0, deposit:0, notes:''},
+    {cat:'Car Hire',      est:0, actual:0, deposit:0, notes:''},
+    {cat:'Restaurants',   est:0, actual:0, deposit:0, notes:''},
+    {cat:'Experiences',   est:0, actual:0, deposit:0, notes:''},
+    {cat:'Shopping',      est:0, actual:0, deposit:0, notes:''},
+    {cat:'Miscellaneous', est:0, actual:0, deposit:0, notes:''},
   ];
 
   const dayNotes = DAYS.map(() => '');
@@ -235,9 +235,12 @@ function loadState(){
     const raw = localStorage.getItem(STORAGE_KEY);
     if(!raw) return defaultState();
     const saved = JSON.parse(raw);
-    // migrate: add actual field if missing
+    // migrate: add actual/deposit fields if missing
     if(saved.budget && saved.budget.length && saved.budget[0] && !('actual' in saved.budget[0])){
-      saved.budget = saved.budget.map(b=>({...b, actual:0}));
+      saved.budget = saved.budget.map(b=>({...b, actual:0, deposit:0}));
+    }
+    if(saved.budget && saved.budget.length && saved.budget[0] && !('deposit' in saved.budget[0])){
+      saved.budget = saved.budget.map(b=>({...b, deposit: b.paid ? Number(b.est||0) : 0}));
     }
     // migrate: flatten items-based format back to flat rows
     if(saved.budget && saved.budget.length && saved.budget[0] && 'items' in saved.budget[0]){
@@ -425,7 +428,7 @@ function routeSvg(){
 
 function renderOverview(){
   const cd = countdownParts();
-  const totalPaidBooked = STATE.budget.reduce((s,b)=>s+(b.paid?Number(b.est||0):0),0);
+  const totalPaidBooked = STATE.budget.reduce((s,b)=>s+Number(b.deposit||0),0);
   const doneCount = TRACKER_DEFAULTS.filter(t=>STATE.tracker[t.id]?.done).length;
   const pct = Math.round(doneCount / TRACKER_DEFAULTS.length * 100);
   const totalEst = STATE.budget.reduce((s,b)=>s+Number(b.est||0),0);
@@ -740,7 +743,7 @@ function renderBudget(){
       <div>${b.cat}</div>
       <div><input type="number" min="0" step="0.01" data-budget-est="${i}" value="${b.est||''}" placeholder="0" ${b.cat==='Accommodation'?'readonly title="Auto-totalled from accommodation costs"':''}/></div>
       <div class="hide-sm"><input type="number" min="0" step="0.01" data-budget-actual="${i}" value="${b.actual||''}" placeholder="0"/></div>
-      <div style="text-align:center"><input type="checkbox" data-budget-paid="${i}" ${b.paid?'checked':''}/></div>
+      <div><input type="number" min="0" step="0.01" data-budget-deposit="${i}" value="${b.deposit||''}" placeholder="0"/></div>
       <div class="hide-sm bal-cell${bal<0?' neg':''}">${fmtMoney(bal)}</div>
       <div class="bnotes"><input type="text" data-budget-notes="${i}" value="${b.notes||''}" placeholder="Notes…"/></div>
     </div>`;
@@ -770,7 +773,7 @@ function renderBudget(){
     </div>
 
     <div class="card">
-      <div class="budget-head-row"><div>Category</div><div>Estimate</div><div class="hide-sm">Actual</div><div>Paid</div><div class="hide-sm">Balance</div><div class="bnhead">Notes</div></div>
+      <div class="budget-head-row"><div>Category</div><div>Estimate</div><div class="hide-sm">Actual</div><div>Deposit Paid</div><div class="hide-sm">Balance</div><div class="bnhead">Notes</div></div>
       ${rows}
       <div class="total-line">
         <span>Total</span><span>${fmtMoney(totalEst)}</span><span class="hide-sm">${fmtMoney(totalActual)}</span><span></span><span class="hide-sm${(totalEst-totalActual)<0?' neg':''}">${fmtMoney(totalEst-totalActual)}</span><span class="bnhead"></span>
@@ -970,10 +973,10 @@ function attachSectionHandlers(route){
         saveState(); render();
       });
     });
-    document.querySelectorAll('[data-budget-paid]').forEach(el=>{
+    document.querySelectorAll('[data-budget-deposit]').forEach(el=>{
       el.addEventListener('change', ()=>{
-        STATE.budget[Number(el.dataset.budgetPaid)].paid = el.checked;
-        saveState();
+        STATE.budget[Number(el.dataset.budgetDeposit)].deposit = Number(el.value)||0;
+        saveState(); render();
       });
     });
     document.querySelectorAll('[data-budget-notes]').forEach(el=>{
