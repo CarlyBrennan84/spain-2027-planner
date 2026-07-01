@@ -973,7 +973,7 @@ function attachSectionHandlers(route){
     document.querySelectorAll('[data-budget-paid]').forEach(el=>{
       el.addEventListener('change', ()=>{
         STATE.budget[Number(el.dataset.budgetPaid)].paid = el.checked;
-        saveState(); render();
+        saveState();
       });
     });
     document.querySelectorAll('[data-budget-notes]').forEach(el=>{
@@ -987,7 +987,7 @@ function attachSectionHandlers(route){
     document.querySelectorAll('[data-pack-cat]').forEach(el=>{
       el.addEventListener('change', ()=>{
         STATE.packing[el.dataset.packCat][Number(el.dataset.packIdx)].done = el.checked;
-        saveState(); render();
+        saveState();
       });
     });
     document.querySelectorAll('[data-add-pack-btn]').forEach(btn=>{
@@ -1007,7 +1007,7 @@ function attachSectionHandlers(route){
         const id = el.dataset.track;
         STATE.tracker[id] = STATE.tracker[id] || {done:false, note:''};
         STATE.tracker[id].done = el.checked;
-        saveState(); render();
+        saveState();
       });
     });
   }
