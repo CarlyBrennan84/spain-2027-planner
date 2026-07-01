@@ -205,15 +205,16 @@ function defaultState(){
     packing[cat] = items.map(name => ({name, done:false}));
   });
 
+  const accomTotal = CITIES.reduce((s,c)=>s+c.accommodation.cost,0);
   const budget = [
-    {cat:'Accommodation', est: CITIES.reduce((s,c)=>s+c.accommodation.cost,0), paid:false, notes:'Auto-totalled from accommodation'},
-    {cat:'Flights', est:0, paid:false, notes:''},
-    {cat:'Trains', est:0, paid:false, notes:''},
-    {cat:'Car Hire', est:0, paid:false, notes:''},
-    {cat:'Restaurants', est:0, paid:false, notes:''},
-    {cat:'Experiences', est:0, paid:false, notes:''},
-    {cat:'Shopping', est:0, paid:false, notes:''},
-    {cat:'Miscellaneous', est:0, paid:false, notes:''},
+    {cat:'Accommodation', open:false, items:[{name:'Hotels (auto-totalled)', est:accomTotal, actual:0, paid:false, notes:'Auto-totalled from accommodation section'}]},
+    {cat:'Flights',       open:false, items:[]},
+    {cat:'Trains',        open:false, items:[]},
+    {cat:'Car Hire',      open:false, items:[]},
+    {cat:'Restaurants',   open:false, items:[]},
+    {cat:'Experiences',   open:false, items:[]},
+    {cat:'Shopping',      open:false, items:[]},
+    {cat:'Miscellaneous', open:false, items:[]},
   ];
 
   const dayNotes = DAYS.map(() => '');
@@ -235,6 +236,15 @@ function loadState(){
     const raw = localStorage.getItem(STORAGE_KEY);
     if(!raw) return defaultState();
     const saved = JSON.parse(raw);
+    // migrate old flat budget format → new category+items format
+    if(saved.budget && saved.budget.length && saved.budget[0] && !('items' in saved.budget[0])){
+      saved.budget = saved.budget.map(b=>({
+        cat: b.cat, open: false,
+        items: (Number(b.est)||0) > 0 || b.notes
+          ? [{name:b.cat, est:Number(b.est)||0, actual:0, paid:!!b.paid, notes:b.notes||''}]
+          : []
+      }));
+    }
     const base = defaultState();
     return deepMerge(base, saved);
   }catch(e){ return defaultState(); }
@@ -409,10 +419,10 @@ function routeSvg(){
 
 function renderOverview(){
   const cd = countdownParts();
-  const totalPaidBooked = STATE.budget.reduce((s,b)=>s + (b.paid? Number(b.est||0):0),0);
+  const totalPaidBooked = STATE.budget.reduce((s,c)=>s+c.items.reduce((ss,it)=>ss+(it.paid?Number(it.est||0):0),0),0);
   const doneCount = TRACKER_DEFAULTS.filter(t=>STATE.tracker[t.id]?.done).length;
   const pct = Math.round(doneCount / TRACKER_DEFAULTS.length * 100);
-  const totalEst = STATE.budget.reduce((s,b)=>s+Number(b.est||0),0);
+  const totalEst = STATE.budget.reduce((s,c)=>s+c.items.reduce((ss,it)=>ss+Number(it.est||0),0),0);
 
   return `
     <div class="card hero-card">
@@ -671,8 +681,8 @@ function renderExperiences(){
 
 /* ============ BUDGET ============ */
 function budgetChartsSvg(){
-  const data = STATE.budget.filter(b=>Number(b.est)>0);
-  const total = data.reduce((s,b)=>s+Number(b.est),0);
+  const data = STATE.budget.map(c=>({cat:c.cat, est:c.items.reduce((s,it)=>s+Number(it.est||0),0)})).filter(d=>d.est>0);
+  const total = data.reduce((s,d)=>s+d.est,0);
   const palette = ['#BF5B3E','#6B7355','#C9A15A','#1F2A3C','#A87C5F','#8C9E7E','#D9B26A','#3E4E5C'];
   if(total===0) return '<p style="font-size:13px;color:var(--text-muted)">Add estimates below to see the breakdown.</p>';
 
@@ -713,21 +723,58 @@ function budgetChartsSvg(){
 }
 
 function renderBudget(){
-  const total = STATE.budget.reduce((s,b)=>s+Number(b.est||0),0);
-  const remaining = STATE.totalBudget - total;
-  const rows = STATE.budget.map((b,i)=>`
-    <div class="budget-row">
-      <div>${b.cat}</div>
-      <div><input type="number" min="0" step="0.01" data-budget-est="${i}" value="${b.est}" ${b.cat==='Accommodation'?'readonly title="Auto-totalled from accommodation costs"':''} /></div>
-      <div><input type="checkbox" data-budget-paid="${i}" ${b.paid?'checked':''} /></div>
-      <div class="bnotes"><input type="text" data-budget-notes="${i}" value="${b.notes||''}" placeholder="Notes..." /></div>
-    </div>`).join('');
+  const catEst    = c => c.items.reduce((s,it)=>s+Number(it.est||0),0);
+  const catActual = c => c.items.reduce((s,it)=>s+Number(it.actual||0),0);
+  const totalEst    = STATE.budget.reduce((s,c)=>s+catEst(c),0);
+  const totalActual = STATE.budget.reduce((s,c)=>s+catActual(c),0);
+  const remaining   = STATE.totalBudget - totalEst;
+
+  const cats = STATE.budget.map((cat,ci)=>{
+    const est     = catEst(cat);
+    const actual  = catActual(cat);
+    const balance = est - actual;
+    const allPaid = cat.items.length > 0 && cat.items.every(it=>it.paid);
+
+    const itemRows = cat.items.map((it,ii)=>{
+      const bal = Number(it.est||0) - Number(it.actual||0);
+      const isAuto = cat.cat==='Accommodation' && ii===0 && it.name.includes('auto');
+      return `
+        <div class="budget-item-row">
+          <div class="bi-name"><input type="text" data-bi-name="${ci}-${ii}" value="${it.name||''}" placeholder="Item description…"/></div>
+          <div><input type="number" min="0" step="0.01" data-bi-est="${ci}-${ii}" value="${it.est||''}" placeholder="0" ${isAuto?'readonly title="Auto-totalled from accommodation section"':''}/></div>
+          <div class="hide-sm"><input type="number" min="0" step="0.01" data-bi-actual="${ci}-${ii}" value="${it.actual||''}" placeholder="0"/></div>
+          <div style="text-align:center"><input type="checkbox" data-bi-paid="${ci}-${ii}" ${it.paid?'checked':''}/></div>
+          <div class="hide-sm bal-cell${bal<0?' neg':''}">${fmtMoney(bal)}</div>
+          <div class="bnotes"><input type="text" data-bi-notes="${ci}-${ii}" value="${it.notes||''}" placeholder="Notes…"/></div>
+          <div><button class="del-item-btn" data-del-item="${ci}-${ii}" title="Remove">×</button></div>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="budget-cat-wrap">
+        <div class="budget-cat-row" data-toggle-cat="${ci}">
+          <div class="cat-toggle-label"><span class="cat-arrow">${cat.open?'▼':'▶'}</span>${cat.cat}</div>
+          <div>${est>0?fmtMoney(est):'—'}</div>
+          <div class="hide-sm">${actual>0?fmtMoney(actual):'—'}</div>
+          <div style="text-align:center">${allPaid?'✓':'—'}</div>
+          <div class="hide-sm${balance<0?' neg':''}">${est>0?fmtMoney(balance):'—'}</div>
+          <div class="bnotes">—</div>
+          <div></div>
+        </div>
+        <div class="budget-items-wrap" style="display:${cat.open?'block':'none'}">
+          ${itemRows}
+          <div class="add-item-row">
+            <button class="add-item-btn" data-add-item="${ci}">+ Add item</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
 
   return `
     <div class="page-head">
       <div class="eyebrow">Running totals</div>
       <h2>Budget</h2>
-      <div class="sub">Estimates roll up automatically. Tick "paid" as you settle each category.</div>
+      <div class="sub">Click a category to expand it and add individual items. Balance = Estimate − Actual.</div>
     </div>
 
     <div class="card" style="margin-bottom:18px;">
@@ -735,10 +782,10 @@ function renderBudget(){
         <div class="stat-box"><div class="v">${fmtMoney(STATE.totalBudget)}</div><div class="l">Total budget</div>
           <input type="number" min="0" step="1" id="totalBudgetInput" value="${STATE.totalBudget}" style="margin-top:8px; width:100%; border:1px solid var(--card-border); border-radius:8px; padding:6px 8px; background:var(--warm-white); color:var(--text);" />
         </div>
-        <div class="stat-box"><div class="v">${fmtMoney(total)}</div><div class="l">Estimated spend</div></div>
+        <div class="stat-box"><div class="v">${fmtMoney(totalEst)}</div><div class="l">Estimated spend</div></div>
         <div class="stat-box"><div class="v" style="color:${remaining<0?'var(--terracotta)':'inherit'}">${fmtMoney(remaining)}</div><div class="l">Remaining</div></div>
       </div>
-      <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100, Math.max(0,(total/Math.max(1,STATE.totalBudget))*100))}%"></div></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,Math.max(0,(totalEst/Math.max(1,STATE.totalBudget))*100))}%"></div></div>
     </div>
 
     <div class="card" style="margin-bottom:18px;">
@@ -747,9 +794,19 @@ function renderBudget(){
     </div>
 
     <div class="card">
-      <div class="budget-head-row"><div>Category</div><div>Estimate (AUD)</div><div>Paid</div><div class="bnhead">Notes</div></div>
-      ${rows}
-      <div class="total-line"><span>Total</span><span>${fmtMoney(total)}</span></div>
+      <div class="budget-head-row bgt-cols">
+        <div>Category / Item</div><div>Estimate</div><div class="hide-sm">Actual</div><div>Paid</div><div class="hide-sm">Balance</div><div class="bnhead">Notes</div><div></div>
+      </div>
+      ${cats}
+      <div class="total-line bgt-cols">
+        <span>Total</span>
+        <span>${fmtMoney(totalEst)}</span>
+        <span class="hide-sm">${fmtMoney(totalActual)}</span>
+        <span></span>
+        <span class="hide-sm${(totalEst-totalActual)<0?' neg':''}">${fmtMoney(totalEst-totalActual)}</span>
+        <span class="bnhead"></span>
+        <span></span>
+      </div>
     </div>
   `;
 }
@@ -933,23 +990,54 @@ function attachSectionHandlers(route){
     document.getElementById('totalBudgetInput').addEventListener('change', (e)=>{
       STATE.totalBudget = Number(e.target.value)||0; saveState(); render();
     });
-    document.querySelectorAll('[data-budget-est]').forEach(el=>{
-      el.addEventListener('change', ()=>{
-        const i = Number(el.dataset.budgetEst);
-        STATE.budget[i].est = Number(el.value)||0;
+    document.querySelectorAll('[data-toggle-cat]').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const ci = Number(el.dataset.toggleCat);
+        STATE.budget[ci].open = !STATE.budget[ci].open;
         saveState(); render();
       });
     });
-    document.querySelectorAll('[data-budget-paid]').forEach(el=>{
-      el.addEventListener('change', ()=>{
-        STATE.budget[Number(el.dataset.budgetPaid)].paid = el.checked;
-        saveState(); render();
-      });
-    });
-    document.querySelectorAll('[data-budget-notes]').forEach(el=>{
+    document.querySelectorAll('[data-bi-name]').forEach(el=>{
       el.addEventListener('blur', ()=>{
-        STATE.budget[Number(el.dataset.budgetNotes)].notes = el.value;
-        saveState();
+        const [ci,ii] = el.dataset.biName.split('-').map(Number);
+        STATE.budget[ci].items[ii].name = el.value; saveState();
+      });
+    });
+    document.querySelectorAll('[data-bi-est]').forEach(el=>{
+      el.addEventListener('change', ()=>{
+        const [ci,ii] = el.dataset.biEst.split('-').map(Number);
+        STATE.budget[ci].items[ii].est = Number(el.value)||0; saveState(); render();
+      });
+    });
+    document.querySelectorAll('[data-bi-actual]').forEach(el=>{
+      el.addEventListener('change', ()=>{
+        const [ci,ii] = el.dataset.biActual.split('-').map(Number);
+        STATE.budget[ci].items[ii].actual = Number(el.value)||0; saveState(); render();
+      });
+    });
+    document.querySelectorAll('[data-bi-paid]').forEach(el=>{
+      el.addEventListener('change', ()=>{
+        const [ci,ii] = el.dataset.biPaid.split('-').map(Number);
+        STATE.budget[ci].items[ii].paid = el.checked; saveState(); render();
+      });
+    });
+    document.querySelectorAll('[data-bi-notes]').forEach(el=>{
+      el.addEventListener('blur', ()=>{
+        const [ci,ii] = el.dataset.biNotes.split('-').map(Number);
+        STATE.budget[ci].items[ii].notes = el.value; saveState();
+      });
+    });
+    document.querySelectorAll('[data-add-item]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const ci = Number(btn.dataset.addItem);
+        STATE.budget[ci].items.push({name:'', est:0, actual:0, paid:false, notes:''});
+        saveState(); render();
+      });
+    });
+    document.querySelectorAll('[data-del-item]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const [ci,ii] = btn.dataset.delItem.split('-').map(Number);
+        STATE.budget[ci].items.splice(ii,1); saveState(); render();
       });
     });
   }
