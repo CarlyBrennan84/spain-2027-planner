@@ -64,9 +64,9 @@ const CITIES = [
     dateRange:'6–9 April', nights:3,
     coords:{x:451.7,y:110.4},
     accommodation:{
-      name:'Airbnb', type:'Airbnb', cost:1272, status:'Reserved',
-      paymentDue:'—', cancellation:'—', breakfast:false,
-      mapsQuery:'Barcelona Spain city centre'
+      name:'Ohla Eixample', type:'Design Room · Full buffet breakfast included · Luxury Escapes', cost:1339, status:'Booked & Paid',
+      paymentDue:'Paid via Luxury Escapes', cancellation:'—', breakfast:true,
+      mapsQuery:'Ohla Eixample Barcelona Spain'
     },
     want:['Gothic Quarter','Rooftop bars','Cocktails','Tapas','Architecture','Final luxury dinner']
   },
