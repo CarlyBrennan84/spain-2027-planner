@@ -362,6 +362,7 @@ function importData(e){
 
 /* ============ RENDER ROUTER ============ */
 function render(){
+  const scrollY = window.scrollY;
   renderNav();
   const route = currentRoute();
   const content = document.getElementById('content');
@@ -371,6 +372,7 @@ function render(){
     budget: renderBudget, packing: renderPacking, maps: renderMaps, tracker: renderTracker,
   };
   content.innerHTML = `<div class="section active">${renderers[route]()}</div>`;
+  window.scrollTo(0, scrollY);
   attachSectionHandlers(route);
   window.scrollTo({top:0, behavior:'instant' in window ? 'instant' : 'auto'});
 }
