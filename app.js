@@ -372,7 +372,7 @@ function render(){
     budget: renderBudget, packing: renderPacking, maps: renderMaps, tracker: renderTracker,
   };
   content.innerHTML = `<div class="section active">${renderers[route]()}</div>`;
-  window.scrollTo(0, scrollY);
+  requestAnimationFrame(() => window.scrollTo(0, scrollY));
   attachSectionHandlers(route);
   window.scrollTo({top:0, behavior:'instant' in window ? 'instant' : 'auto'});
 }
