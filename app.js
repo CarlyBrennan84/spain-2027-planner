@@ -207,7 +207,8 @@ function defaultState(){
 
   const budget = [
     {cat:'Accommodation', est: CITIES.reduce((s,c)=>s+c.accommodation.cost,0), actual:0, deposit:0, notes:'Auto-totalled from accommodation'},
-    {cat:'Flights',       est:0, actual:0, deposit:0, notes:''},
+    {cat:'Flights (International)', est:0, actual:0, deposit:0, notes:''},
+    {cat:'Flights (Internal)',      est:0, actual:0, deposit:0, notes:''},
     {cat:'Trains',        est:0, actual:0, deposit:0, notes:''},
     {cat:'Car Hire',      est:0, actual:0, deposit:0, notes:''},
     {cat:'Restaurants',   est:0, actual:0, deposit:0, notes:''},
