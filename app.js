@@ -253,6 +253,15 @@ function loadState(){
         notes: b.items && b.items[0] ? b.items[0].notes : '',
       }));
     }
+    // migrate: split old 'Flights' row into International + Internal
+    if(saved.budget && saved.budget.some(b=>b.cat==='Flights') && !saved.budget.some(b=>b.cat==='Flights (International)')){
+      const fi = saved.budget.findIndex(b=>b.cat==='Flights');
+      const old = saved.budget[fi];
+      saved.budget.splice(fi, 1,
+        {cat:'Flights (International)', est:old.est||0, actual:old.actual||0, deposit:old.deposit||0, notes:old.notes||''},
+        {cat:'Flights (Internal)',      est:0, actual:0, deposit:0, notes:''}
+      );
+    }
     const base = defaultState();
     return deepMerge(base, saved);
   }catch(e){ return defaultState(); }
