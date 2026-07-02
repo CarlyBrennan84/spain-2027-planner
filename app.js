@@ -206,27 +206,42 @@ const EXPERIENCES = [
 
 /* ---------- Booking tracker (default items) ---------- */
 const TRACKER_DEFAULTS = [
-  {id:'acc-madrid', group:'Accommodation', label:'Madrid — Gran Vía Airbnb', done:true, note:'Reserved · due 17 Feb 2027'},
-  {id:'acc-valencia', group:'Accommodation', label:'Valencia — Caro Hotel', done:true, note:'Booked & paid'},
-  {id:'acc-mallorca', group:'Accommodation', label:'Mallorca — Alcázar Hotel Sóller', done:true, note:'Reserved, flexible rate'},
-  {id:'acc-barcelona', group:'Accommodation', label:'Barcelona — Airbnb', done:true, note:'Reserved'},
-  {id:'flights-intl', group:'Flights', label:'International flights (MEL ⇄ MAD / BCN)', done:true, note:'MEL→MAD 26–27 Mar; BCN→MEL 9–10 Apr, both Economy'},
-  {id:'flights-vlc-pmi', group:'Flights', label:'Valencia → Mallorca flight', done:false, note:''},
-  {id:'flights-pmi-bcn', group:'Flights', label:'Mallorca → Barcelona flight', done:false, note:''},
-  {id:'train-toledo', group:'Train Tickets', label:'Madrid ⇄ Toledo (Renfe)', done:false, note:''},
-  {id:'train-mad-vlc', group:'Train Tickets', label:'Madrid → Valencia (AVE)', done:false, note:''},
-  {id:'car-mallorca', group:'Car Hire', label:'Mallorca car hire (Sóller pickup)', done:false, note:''},
-  {id:'rest-toledo', group:'Restaurant Bookings', label:'Toledo lunch', done:false, note:''},
-  {id:'rest-paella', group:'Restaurant Bookings', label:'Valencia — Casa Carmela paella', done:false, note:''},
-  {id:'rest-final', group:'Restaurant Bookings', label:'Barcelona — final luxury dinner', done:false, note:''},
-  {id:'attr-sagrada', group:'Attractions', label:'Sagrada Família timed entry', done:false, note:''},
-  {id:'attr-prado', group:'Attractions', label:'Museo del Prado timed entry', done:false, note:''},
-  {id:'attr-boat', group:'Attractions', label:'Mallorca boat trip', done:false, note:''},
-  {id:'attr-wine', group:'Attractions', label:'Mallorca wine tasting', done:false, note:''},
-  {id:'insurance', group:'Travel Insurance', label:'Travel insurance — both travellers', done:false, note:''},
-  {id:'esim', group:'ESIM', label:'ESIM / data plan for Spain', done:false, note:''},
-  {id:'packing', group:'Packing', label:'Packing complete', done:false, note:''},
-  {id:'passport', group:'Passport', label:'Passports valid 6+ months past return', done:false, note:''},
+  // Accommodation
+  {id:'acc-madrid',    group:'Accommodation', label:'Madrid — Gran Vía Airbnb',         done:true,  note:'Reserved · due 17 Feb 2027'},
+  {id:'acc-valencia',  group:'Accommodation', label:'Valencia — Caro Hotel',             done:true,  note:'Booked & paid'},
+  {id:'acc-mallorca',  group:'Accommodation', label:'Mallorca — Alcázar Hotel Sóller',   done:true,  note:'Reserved, flexible rate'},
+  {id:'acc-barcelona', group:'Accommodation', label:'Barcelona — Ohla Eixample',         done:true,  note:'Booked & paid via Luxury Escapes · Design Room · breakfast included'},
+  // Flights
+  {id:'flights-intl',    group:'Flights', label:'International flights (MEL ⇄ MAD / BCN)', done:true,  note:'MEL→MAD 26–27 Mar; BCN→MEL 9–10 Apr'},
+  {id:'flights-vlc-pmi', group:'Flights', label:'Valencia → Mallorca (Fri 2 Apr)',          done:false, note:''},
+  {id:'flights-pmi-bcn', group:'Flights', label:'Mallorca → Barcelona (Tue 6 Apr)',          done:false, note:''},
+  // Train Tickets
+  {id:'train-toledo',  group:'Train Tickets', label:'Madrid ⇄ Toledo — Renfe Avant (Mon 29 Mar)', done:false, note:'~34 min from Atocha · book return when 2027 dates open'},
+  {id:'train-mad-vlc', group:'Train Tickets', label:'Madrid → Valencia — AVE (Wed 31 Mar)',        done:false, note:'~1hr 40min'},
+  // Car Hire
+  {id:'car-mallorca', group:'Car Hire', label:'Mallorca car hire — pickup Fri 2 Apr, drop Tue 6 Apr', done:false, note:'Confirm pickup location (Palma airport or Sóller)'},
+  // Airport Transfers
+  {id:'transfer-madrid-arr', group:'Airport Transfers', label:'Madrid arrival — airport to Gran Vía (Sat 27 Mar)',       done:false, note:'Taxi/Uber/Cabify recommended with luggage · approx €30–40'},
+  {id:'transfer-bcn-dep',    group:'Airport Transfers', label:'Barcelona departure — Ohla Eixample to airport (Fri 9 Apr)', done:false, note:'Early pickup ~5:00am'},
+  // Restaurant Bookings
+  {id:'rest-dstage',       group:'Restaurant Bookings', label:'Madrid — DSTAgE fine dining (Tue 30 Mar)',           done:false, note:'Tasting menu ~€195pp · book as soon as possible'},
+  {id:'rest-juana',        group:'Restaurant Bookings', label:'Madrid — Juana La Loca (Sun 28 Mar)',                done:false, note:'Elevated tapas, La Latina'},
+  {id:'rest-casa-lucio',   group:'Restaurant Bookings', label:'Madrid — Casa Lucio (Sun 28 Mar)',                   done:false, note:'Classic Madrid tapas · book ahead'},
+  {id:'rest-toledo',       group:'Restaurant Bookings', label:'Toledo — Adolfo or La Orza lunch (Mon 29 Mar)',      done:false, note:''},
+  {id:'rest-vlc-seafood',  group:'Restaurant Bookings', label:'Valencia — seafood lunch / paella (Thu 1 Apr)',      done:false, note:''},
+  {id:'rest-mallorca-cove',group:'Restaurant Bookings', label:'Mallorca — Chiringuito Cala Sa Nau (Sat 3 Apr)',     done:false, note:'Book by phone/email · ask about April trading & sunbeds · aim for 1:00–1:30pm'},
+  {id:'rest-bcn-final',    group:'Restaurant Bookings', label:'Barcelona — farewell dinner (Thu 8 Apr)',            done:false, note:'Special occasion — book ahead'},
+  // Bars & Cocktail Bars
+  {id:'bar-salmon-guru', group:'Bars & Cocktail Bars', label:'Madrid — Salmon Guru (Sun 28 Mar)', done:false, note:'Famous creative cocktail bar · book online or arrive early'},
+  // Attractions
+  {id:'attr-royal-palace', group:'Attractions', label:'Madrid — Royal Palace timed entry (Sun 28 Mar)',        done:false, note:'€24pp · book online ahead'},
+  {id:'attr-prado',        group:'Attractions', label:'Madrid — Museo del Prado timed entry (Tue 30 Mar)',     done:false, note:'€15pp · timed entry required — book online'},
+  {id:'attr-sagrada',      group:'Attractions', label:'Barcelona — Sagrada Família timed entry (Wed 7 Apr)',   done:false, note:'Book well ahead — sells out quickly'},
+  // Essentials
+  {id:'insurance', group:'Essentials', label:'Travel insurance — both travellers',          done:false, note:''},
+  {id:'esim',      group:'Essentials', label:'ESIM / data plan for Spain',                  done:false, note:''},
+  {id:'passport',  group:'Essentials', label:'Passports valid 6+ months past 10 Apr 2027', done:false, note:''},
+  {id:'packing',   group:'Essentials', label:'Packing complete',                            done:false, note:''},
 ];
 
 /* ---------- Packing (default items) ---------- */
