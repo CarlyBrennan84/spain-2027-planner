@@ -1,4 +1,4 @@
-const CACHE = 'spain2027-v6';
+const CACHE = 'spain2027-v7';
 const ASSETS = ['./', './index.html', './app.js', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (e) => {
