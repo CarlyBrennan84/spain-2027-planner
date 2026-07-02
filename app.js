@@ -778,7 +778,7 @@ function renderBudget(){
       <div class="budget-head-row"><div>Category</div><div>Estimate</div><div class="hide-sm">Actual</div><div>Deposit Paid</div><div class="hide-sm">Balance</div><div class="bnhead">Notes</div></div>
       ${rows}
       <div class="total-line">
-        <span>Total</span><span>${fmtMoney(totalEst)}</span><span class="hide-sm">${fmtMoney(totalActual)}</span><span></span><span class="hide-sm${(totalEst-totalDeposit)<0?' neg':''}">${fmtMoney(totalEst-totalDeposit)}</span><span class="bnhead"></span>
+        <span>Total</span><span>${fmtMoney(totalEst)}</span><span class="hide-sm">${fmtMoney(totalActual)}</span><span>${fmtMoney(totalDeposit)}</span><span class="hide-sm${(totalEst-totalDeposit)<0?' neg':''}">${fmtMoney(totalEst-totalDeposit)}</span><span class="bnhead"></span>
       </div>
     </div>
   `;
