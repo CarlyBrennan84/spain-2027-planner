@@ -608,14 +608,15 @@ function renderItinerary(){
           <div class="dblock"><div class="lbl">Morning</div><div class="val">${d.morning}</div></div>
           <div class="dblock"><div class="lbl">Lunch</div><div class="val">${d.lunch}</div></div>
           <div class="dblock"><div class="lbl">Afternoon</div><div class="val">${d.afternoon}</div></div>
-          <div class="dblock"><div class="lbl">Cocktail bar</div><div class="val">${d.cocktail}</div></div>
           <div class="dblock"><div class="lbl">Dinner</div><div class="val">${d.dinner}</div></div>
-          <div class="dblock"><div class="lbl">Walking route</div><div class="val">${d.walkingRoute}</div></div>
-          <div class="dblock"><div class="lbl">Est. cost</div><div class="val">${d.estCost}</div></div>
-          <div class="dblock"><div class="lbl">Travel time</div><div class="val">${d.travelTime}</div></div>
+          <div class="day-meta-row">
+            <div class="dblock"><div class="lbl">Est. cost</div><div class="val">${d.estCost}</div></div>
+            <div class="dblock"><div class="lbl">Travel</div><div class="val">${d.travelTime}</div></div>
+            <div class="dblock"><div class="lbl">Walking</div><div class="val">${d.walkingRoute}</div></div>
+          </div>
           <div class="dblock"><div class="lbl">Booking needed</div><div class="val">${d.booking}</div></div>
-          <div class="dblock"><div class="lbl">Photography spots</div><div class="val">${d.photoSpots}</div></div>
-          <div class="dblock" style="grid-column:1/-1;">
+          <div class="dblock"><div class="lbl">Photo spots</div><div class="val">${d.photoSpots}</div></div>
+          <div class="dblock">
             <div class="lbl">Notes</div>
             <textarea data-daynote="${i}" placeholder="Add your own notes for this day...">${STATE.dayNotes[i]||''}</textarea>
           </div>

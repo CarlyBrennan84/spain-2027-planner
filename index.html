@@ -190,9 +190,10 @@ textarea.notes-field, input.notes-field{
 .day-head .dsub{font-size:12.5px; color:var(--text-muted); margin-top:2px;}
 .chev{transition:transform 0.25s; color:var(--text-muted); font-size:14px;}
 .day-card.open .chev{transform:rotate(180deg);}
-.day-body{max-height:0; overflow:hidden; transition:max-height 0.35s ease;}
-.day-card.open .day-body{max-height:2000px;}
-.day-body-inner{padding:0 22px 22px; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; border-top:1px solid var(--card-border); padding-top:16px;}
+.day-body{max-height:0; overflow:hidden; transition:max-height 0.45s ease;}
+.day-card.open .day-body{max-height:6000px;}
+.day-body-inner{padding:0 22px 22px; display:flex; flex-direction:column; gap:14px; border-top:1px solid var(--card-border); padding-top:16px;}
+.day-meta-row{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
 .dblock .lbl{font-size:10.5px; text-transform:uppercase; letter-spacing:0.09em; color:var(--terracotta); font-weight:700; margin-bottom:4px;}
 .dblock .val{font-size:13.5px; line-height:1.5;}
 .dblock textarea{width:100%; min-height:44px; border:1px solid var(--card-border); background:var(--warm-white); border-radius:var(--radius-sm); padding:8px 10px; font-family:inherit; font-size:13px; color:var(--text); resize:vertical;}
