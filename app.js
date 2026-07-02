@@ -938,7 +938,7 @@ function renderTracker(){
         return `
         <div class="check-item ${s.done?'done':''}">
           <input type="checkbox" id="trk-${t.id}" data-track="${t.id}" ${s.done?'checked':''}/>
-          <label for="trk-${t.id}">${t.label}${s.note? ` <span class="due">— ${s.note}</span>`:''}</label>
+          <label for="trk-${t.id}">${t.label}${s.note? `<br><span class="due">${s.note}</span>`:''}</label>
         </div>`;
       }).join('')}
     </div>`).join('');
@@ -950,7 +950,7 @@ function renderTracker(){
       <div class="sub">${doneCount} of ${TRACKER_DEFAULTS.length} complete.</div>
       <div class="progress-track" style="max-width:400px;"><div class="progress-fill" style="width:${pct}%"></div></div>
     </div>
-    <div class="grid grid-2">${blocks}</div>
+    <div>${blocks}</div>
   `;
 }
 
